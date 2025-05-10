@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "express": "^5.0.0",
-      "ytdl-core": "4.11.5"
+      "@distube/ytdl-core": "^4.16.10"
 
   }
 }
