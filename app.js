@@ -1,30 +1,38 @@
 const express = require("express");
-const ytdl = require("ytdl-core");
+const ytdl = require("@distube/ytdl-core");
+const fs = require("fs");
+
 const app = express();
 const port = process.env.PORT || 3001;
 
+// Endpoint to fetch video details
 app.get("/video/:id", async (req, res) => {
   const videoUrl = `https://www.youtube.com/watch?v=${req.params.id}`;
-
+  
   try {
     const info = await ytdl.getInfo(videoUrl);
-    const audioUrl = ytdl.chooseFormat(info.formats, { quality: 'highestaudio' }).url;
-    const title = info.videoDetails.title;
-    const duration = info.videoDetails.lengthSeconds;
-    const thumbnail = info.videoDetails.thumbnails[0].url;
-
-    res.json({
-      title,
-      duration,
-      thumbnail,
-      audioUrl,
-    });
+    res.json(info.videoDetails);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Failed to fetch video details" });
   }
 });
 
-const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+// Endpoint to download video
+app.get("/download/:id", (req, res) => {
+  const videoUrl = `https://www.youtube.com/watch?v=${req.params.id}`;
+  
+  try {
+    const stream = ytdl(videoUrl, { filter: "audioonly" });
+    res.header("Content-Disposition", `attachment; filename="video.mp4"`);
+    stream.pipe(res);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to download video" });
+  }
+});
 
-server.keepAliveTimeout = 120 * 1000;
-server.headersTimeout = 120 * 1000;
+// Start server
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
