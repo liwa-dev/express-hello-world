@@ -14,7 +14,7 @@ app.get("/video/:id", async (req, res) => {
     res.json(info.videoDetails);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to fetch video details" });
+    res.status(500).json({ error: error });
   }
 });
 
